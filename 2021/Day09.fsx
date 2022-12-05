@@ -1,12 +1,17 @@
-open System.Linq
+let inline (++) x = x + 1
 
-type Direction = Up | Down | Left | Right | Low
-type Node = { value: int; gradient: Direction; }
+let neighbors r c (A:'a[,]) =
+    [if r > 0 then yield A.[r-1,c]
+     if r < Array2D.length1 A - 1 then yield A.[r+1,c]
+     if c > 0 then yield A.[r,c-1]
+     if c < Array2D.length2 A - 1 then yield A.[r,c+1]]
 
-let valToNode ch = { value = int ch - int '0'; gradient = Up }
-let input = "inputs/day09.txt" |> System.IO.File.ReadAllLines |> Seq.map (Seq.toList >> List.map valToNode) |> Seq.toList
+let localBottom arr (r, c) = (neighbors r c arr) |> List.forall (fun node -> node > (Array2D.get arr r c))
 
-let neigighbors matrix (x, y) =
-    let deltas = [(x - 1, y); (x + 1, y); (x, y - 1); (x, y + 1)] 
-    deltas |> List.where (fun (x, y) -> x > 0 && y > 0 && x < matrix.[0].Length && y < matrix.Length)
-    
+let input = 
+    "2021/inputs/day09.txt" 
+    |> System.IO.File.ReadAllLines 
+    |> Seq.map (Seq.map (fun ch -> int ch - int '0'))
+    |> array2D
+
+input |> Array2D.mapi (fun x y n -> (n, localBottom input (x, y))) |> Seq.cast<(int * bool)> |> Seq.filter snd |> Seq.sumBy (fst >> (++))
