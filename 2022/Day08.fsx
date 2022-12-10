@@ -1,4 +1,4 @@
-let input = System.IO.File.ReadAllLines "2022/inputs/day08.txt" |> Seq.map (Seq.map System.Char.ToString) |> array2D
+let input = System.IO.File.ReadAllLines "2022/inputs/day08.txt" |> array2D
 
 let isVisible row i value = [Seq.take i row; Seq.skip (i + 1) row] |> List.map (Seq.forall ((>)value))
 
