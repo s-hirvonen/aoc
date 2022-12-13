@@ -1,6 +1,6 @@
 open System.Text.RegularExpressions
 
-type Monke = { Items: int64 list; Destinations: int * int; Divider: int64; Test: int64 -> int64; Operation: int64 -> int64; InspectionCount: int64 }
+type Monke = { Items: int64 list; Destinations: int * int; Divider: int64; Test: int64 -> bool; Operation: int64 -> int64; InspectionCount: int64 }
 let repeat f n = Seq.init n (fun _ u -> f u) |> Seq.reduce (>>)
 let square n = pown n 2
 // let kalm n = n / 3L
@@ -18,7 +18,7 @@ let playRound list =
         let outbox =
             monke.Items
             |> List.map (monke.Operation >> commonModulo)
-            |> List.partition (fun i -> monke.Test i = 0)
+            |> List.partition monke.Test
             ||> fun pass fail -> Map [(fst monke.Destinations, pass); (snd monke.Destinations, fail)]
         let inbox num =
             match outbox |> Map.tryFind num with
@@ -40,7 +40,7 @@ let playRound list =
     |> (fun parts -> {
         Items = List.map int64 parts[2]
         Destinations = int parts[0].[1], int parts[0].[2]
-        Test = fun level -> level % (int64 parts[0].[0])
+        Test = fun level -> level % (int64 parts[0].[0]) = 0
         Divider = int64 parts[0].[0]
         InspectionCount = 0
         Operation =
