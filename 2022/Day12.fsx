@@ -6,58 +6,64 @@ let add a b = fst a + fst b, snd a + snd b
 let neighbors maze point = [-1,0; 0,-1; 0,1; 1,0] |> List.map (add point) |> List.filter (exists maze)
 let distance n1 n2 = (pown (n2.X - n1.X) 2) + (pown (n2.Y - n1.Y) 2) |> float |> sqrt |> int
 
-let input = System.IO.File.ReadAllLines "2022/inputs/day12.txt" |> array2D
-let canStepTo fromPoint toPoint =
-    let fromValue = fromPoint ||> Array2D.get input |> (function | 'S' -> 'a' | 'E' -> 'z' | ch -> ch)
-    let toValue   = toPoint   ||> Array2D.get input |> (function | 'S' -> 'a' | 'E' -> 'z' | ch -> ch)
-    int toValue - int fromValue <= 1
-
-let maze = input |> Array2D.mapi (
-    (fun y x ch -> { Value = ch; X = x; Y = y; Next = ((y, x) |> neighbors input |> List.filter (canStepTo (y, x))) }))
-
-let pathfind goal start =
+let pathfind maze goal start =
     let h = distance goal
     let rec reconstruct (cameFrom: Map<Node, Node>) (current: Node) (path: Node list) =
         match cameFrom |> Map.tryFind current with
         | Some from -> reconstruct cameFrom from ([current] @ path)
         | None   -> path
 
-    let rec traverse current openSet cameFrom (gScore: Map<Node, int>) (fScore: Map<Node, int>) remainingNeighbors =
-        let isLooping    = Seq.length remainingNeighbors > 0
-        if Set.isEmpty openSet && not isLooping then None else // No path found
-        let current      = if isLooping then current else openSet |> Seq.minBy (fun node -> fScore.[node])
-        let newOpenSet   = if isLooping then openSet else openSet |> Set.remove current
-        let newNeighbors = if isLooping then remainingNeighbors else current.Next
+    let rec inner current maze openSet cameFrom (gScore: Map<Node, int>) (fScore: Map<Node, int>) neighbors =
+        match neighbors with
+        | [] -> (openSet, cameFrom, gScore, fScore)
+        | (y, x)::xs -> (
+            let tentative_gScore = gScore.[current] + 1
+            let neighbor = Array2D.get maze y x
+            let neighbor_gScore = Map.tryFind neighbor gScore |> function | Some a -> a | None -> System.Int32.MaxValue
+            if tentative_gScore < neighbor_gScore then
+                inner
+                    current maze (openSet |> Set.add neighbor)
+                    (cameFrom |> Map.add neighbor current)
+                    (gScore |> Map.add neighbor tentative_gScore)
+                    (fScore |> Map.add neighbor (tentative_gScore + h neighbor))
+                    xs
+            else inner current maze openSet cameFrom gScore fScore xs)
 
-        match current with
-        | n when n = goal -> Some (reconstruct cameFrom current []) // Path found, reconstruct and return
-        | _ ->
-            match newNeighbors with
-            | [] -> traverse current newOpenSet cameFrom gScore fScore newNeighbors
-            | (y, x)::xs -> (
-                let tentative_gScore = gScore.[current] + 1
-                let neighbor = Array2D.get maze y x
-                let neighbor_gScore = Map.tryFind neighbor gScore |> function | Some a -> a | None -> System.Int32.MaxValue
-                if tentative_gScore < neighbor_gScore then
-                    traverse
-                        current
-                        (newOpenSet |> Set.add neighbor)
-                        (cameFrom |> Map.add neighbor current)
-                        (gScore |> Map.add neighbor tentative_gScore)
-                        (fScore |> Map.add neighbor (tentative_gScore + h neighbor))
-                        xs
-                else traverse current newOpenSet cameFrom gScore fScore xs)
+    let rec traverse openSet cameFrom (gScore: Map<Node, int>) (fScore: Map<Node, int>) =
+        match Set.isEmpty openSet with
+        | true -> None
+        | false -> (
+            match (openSet |> Seq.minBy (fun node -> fScore.[node])) with
+            | n when n = goal -> Some (reconstruct cameFrom goal [])
+            | current -> (
+                let (os, cf, gs, fs) = inner current maze (openSet |> Set.remove current) cameFrom gScore fScore current.Next
+                traverse os cf gs fs))
 
-    let gScore = [(start, 0)] |> Map.ofSeq
-    let fScore = [(start, h start)] |> Map.ofSeq
-    traverse start (Set [start]) (Map.empty) gScore fScore []
+    traverse (Set [start]) (Map.empty) ([(start, 0)] |> Map.ofSeq) ([(start, h start)] |> Map.ofSeq)
 
-let part1 =
-    let start = maze |> Seq.cast<Node> |> Seq.find (fun n -> n.Value = 'S')
-    let goal  = maze |> Seq.cast<Node> |> Seq.find (fun n -> n.Value = 'E')
-    pathfind goal start |> function | Some path -> Seq.length path | None -> failwith "No path found"
+System.IO.File.ReadAllLines "2022/inputs/day12.txt" |> array2D
+|> (fun input ->
+    let canStepTo fromPoint toPoint =
+        let fromValue = fromPoint ||> Array2D.get input |> (function | 'S' -> 'a' | 'E' -> 'z' | ch -> ch)
+        let toValue   = toPoint   ||> Array2D.get input |> (function | 'S' -> 'a' | 'E' -> 'z' | ch -> ch)
+        int toValue - int fromValue <= 1
 
-let part2 =
-    let goal =  maze |> Seq.cast<Node> |> Seq.find (fun n -> n.Value = 'E')
-    maze |> Seq.cast<Node> |> Seq.filter (fun node -> node.Value = 'a')
-    |> Seq.map (pathfind goal) |> Seq.choose id |> Seq.minBy Seq.length |> Seq.length
+    let maze = input |> Array2D.mapi (
+        (fun y x ch -> { Value = ch; X = x; Y = y; Next = ((y, x) |> neighbors input |> List.filter (canStepTo (y, x))) }))
+    let find ch = maze |> Seq.cast<Node> |> Seq.find (fun n -> n.Value = ch)
+
+    let part1 = pathfind maze (find 'E') (find 'S')
+
+    let part2 =
+        maze |> Seq.cast<Node> |> Seq.filter (fun n -> n.Value = 'a')
+        |> Seq.map (pathfind maze (find 'E')) |> Seq.choose id |> Seq.minBy Seq.length |> Seq.length
+
+    let draw path =
+        input |> Array2D.iteri (fun y x ch ->
+            match (path |> List.tryFind (fun node -> node.X = x && node.Y = y)) with
+            | Some _ -> printf "█"
+            | None   -> printf "%c" ch
+            if x + 1 = (Array2D.length2 input) then printf "\n")
+
+    part1 |> function | Some path -> draw path | None -> failwith "No path found"
+    ((part1 |> function | Some path -> Seq.length path | None -> failwith "No path found"), part2))
