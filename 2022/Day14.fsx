@@ -1,5 +1,4 @@
 let split (delim: string) (str: string) = str.Split(delim, System.StringSplitOptions.RemoveEmptyEntries)
-
 let offset = 200
 let allPoints ((a, b), (c, d)) = ([min a c..max a c], [min b d..max b d]) ||> Seq.allPairs
 let setPoint offset value arr (a, b) = Array2D.set arr (a + offset) b value; arr
