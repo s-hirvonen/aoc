@@ -26,4 +26,4 @@ let rec bisect dict floor exp =
 |> System.IO.File.ReadAllLines
 |> Seq.map (split ":" >> parse)
 |> Map.ofSeq
-|> fun dict -> lookup dict "root", bisect (dict |> Map.add "humn" (Constant 1m)) 0m 0
+|> fun dict -> lookup dict "root", bisect dict 0m 0
