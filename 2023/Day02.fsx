@@ -22,6 +22,6 @@ let part1 =
     |> Seq.filter (fun (_, r) -> r.["red"] <= 12 && r.["green"] <= 13 && r.["blue"] <= 14)
     |> Seq.sumBy (fst >> (+) 1)
 
-let part2 = games |> Seq.sumBy (fun r -> r.["red"] * r.["green"] * r.["blue"])
+let part2 = games |> Seq.sumBy (Map.values >> Seq.reduce (*))
 
 printfn "%d, %d" part1 part2
