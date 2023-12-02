@@ -9,4 +9,5 @@ insert_final_newline = true
 trim_trailing_whitespace = false
 
 [*.{fs,fsx,fsi}]
+fsharp_max_array_or_list_width = 120
 fsharp_max_record_width = 80
