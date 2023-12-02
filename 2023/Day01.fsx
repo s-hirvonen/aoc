@@ -5,7 +5,7 @@ let numPosition (defs: string list) (str: string) =
     |> Seq.filter (snd >> (<=) 0)
 
 let solve defs =
-    "inputs/day01.txt"
+    "2023/inputs/day01.txt"
     |> System.IO.File.ReadAllLines
     |> Seq.sumBy (
         defs @ ([0..9] |> List.map string) |> numPosition
