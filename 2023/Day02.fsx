@@ -1,5 +1,5 @@
 let split (delim: string) (str: string) = str.Split(delim) |> List.ofSeq
-let trim (str: string) = [ str.Trim() ]
+let trim (str: string) = str.Trim()
 
 let maxValue (acc: Map<string, int>) (item: string list) =
     acc.Add(item.[1], max (int item.[0]) acc.[item[1]])
@@ -11,7 +11,7 @@ let games =
         >> List.tail
         >> List.map (
             split ";"
-            >> List.collect ((split ",") >> List.collect (trim >> List.map (split " ")))
+            >> List.collect ((split ",") >> List.map (trim >> split " "))
             >> List.fold maxValue (Map([ "red", 0; "green", 0; "blue", 0 ]))
         )
     )
