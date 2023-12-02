@@ -5,12 +5,14 @@ let numPosition (defs: string list) (str: string) =
     |> Seq.filter (snd >> (<=) 0)
 
 let solve defs =
-    "2023/inputs/day01.txt"
+    "inputs/day01.txt"
     |> System.IO.File.ReadAllLines
     |> Seq.sumBy (
-        defs @ ([0..9] |> List.map string) |> numPosition
+        defs @ ([ 0..9 ] |> List.map string)
+        |> numPosition
         >> fun row -> Seq.minBy snd row, Seq.maxBy snd row
         >> fun (a, b) -> fst a % 10 * 10 + fst b % 10
     )
 
-printfn "%d, %d" <|| (solve [], solve ["zero"; "one"; "two"; "three"; "four"; "five"; "six"; "seven"; "eight"; "nine"])
+printfn "%d, %d"
+<|| (solve [], solve [ "zero"; "one"; "two"; "three"; "four"; "five"; "six"; "seven"; "eight"; "nine" ])
