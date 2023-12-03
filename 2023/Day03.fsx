@@ -35,7 +35,7 @@ let hasAdjacentSymbol items point =
                 (>=<) (point.Y - 1) (point.Y + 1) (candidate.Y)
                 && (>=<) (point.X - 1) (point.X + (n |> string |> Seq.length)) (candidate.X)
             | Number _ -> false)
-    | _ -> false // This is a symbol point, not part of schematic
+    | _ -> false
 
 let gearRatio items point =
     items
@@ -45,7 +45,6 @@ let gearRatio items point =
         | Number n ->
             (>=<) (point.Y - 1) (point.Y + 1) (candidate.Y)
             && (>=<) (point.X - (n |> string |> Seq.length)) (point.X + 1) (candidate.X))
-
 
 let input =
     System.IO.File.ReadAllLines "inputs/day03.txt"
