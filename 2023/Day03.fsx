@@ -1,14 +1,14 @@
-type Point =
-    | Number of int
+type Object =
+    | Part of int
     | Symbol of char
 
-type Part = { Value: Point; X: int; Y: int }
+type SchematicItem = { Value: Object; X: int; Y: int }
 
 let inline (>=<) low high x = x >= low && x <= high
 
 let value =
     function
-    | { Value = Number x } -> x
+    | { Value = Part x } -> x
     | { Value = Symbol _ } -> failwith "Symbol has no value"
 
 let newState (items, reading) (x, y, ch) =
@@ -16,25 +16,30 @@ let newState (items, reading) (x, y, ch) =
     | ch when System.Char.IsDigit ch ->
         match reading, x with
         | false, _
-        | true, 0 -> [ { Value = Number(int ch - int '0'); X = x; Y = y } ] @ items, true
+        | true, 0 -> { Value = Part(int ch - int '0'); X = x; Y = y } :: items, true
         | true, _ ->
             [ { List.head items with
-                  Value = Number(items |> List.head |> value |> (*) 10 |> (+) (int ch - int '0')) } ]
+                  Value = Part(items |> List.head |> value |> (*) 10 |> (+) (int ch - int '0')) } ]
             @ List.tail items,
             true
     | '.' -> items, false
-    | ch -> [ { Value = Symbol ch; X = x; Y = y } ] @ items, false
+    | ch -> { Value = Symbol ch; X = x; Y = y } :: items, false
 
 let hasAdjacentSymbol items point =
     match point.Value with
-    | Number n ->
+    | Part n ->
         items
         |> List.exists (fun candidate ->
             match candidate.Value with
             | Symbol _ ->
                 (>=<) (point.Y - 1) (point.Y + 1) (candidate.Y)
                 && (>=<) (point.X - 1) (point.X + (n |> string |> Seq.length)) (candidate.X)
-            | Number _ -> false)
+            | Part _ -> false)
+    | _ -> false
+
+let isGear =
+    function
+    | { Value = Symbol '*' } -> true
     | _ -> false
 
 let gearRatio items point =
@@ -42,7 +47,7 @@ let gearRatio items point =
     |> List.filter (fun candidate ->
         match candidate.Value with
         | Symbol _ -> false
-        | Number n ->
+        | Part n ->
             (>=<) (point.Y - 1) (point.Y + 1) (candidate.Y)
             && (>=<) (point.X - (n |> string |> Seq.length)) (point.X + 1) (candidate.X))
 
@@ -61,12 +66,7 @@ let part1 =
 
 let part2 =
     input
-    |> fun items ->
-        (items
-         |> List.filter (function
-             | { Value = Symbol '*' } -> true
-             | _ -> false))
-        |> List.map (gearRatio items)
+    |> fun items -> (items |> List.filter isGear) |> List.map (gearRatio items)
     |> List.filter (List.length >> (=) 2)
     |> List.sumBy (List.map value >> List.reduce (*))
 
