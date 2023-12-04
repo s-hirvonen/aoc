@@ -3,10 +3,7 @@ let scores2 = Map.ofList [ ')', 1L; ']', 2L; '}', 3L; '>', 4L ]
 
 let matches opening closing =
     match $"{opening}{closing}" with
-    | "()"
-    | "[]"
-    | "{}"
-    | "<>" -> true
+    | "()" | "[]" | "{}" | "<>" -> true
     | _ -> false
 
 let parse acc (ch: char) =
@@ -26,9 +23,7 @@ let input =
 
 let part1 =
     input
-    |> Array.choose (function
-        | Error ch -> Some scores.[ch]
-        | _ -> None)
+    |> Array.choose (function | Error ch -> Some scores.[ch] | _ -> None)
     |> Array.sum
 
 let part2 =
@@ -38,8 +33,7 @@ let part2 =
         | _ -> None)
     |> Array.map (
         List.map (fun ch -> ")]}>".["([{<".IndexOf(string ch)])
-        >> List.fold (fun acc ch -> acc * 5L + scores2.[ch]) 0L
-    )
+        >> List.fold (fun acc ch -> acc * 5L + scores2.[ch]) 0L)
     |> Array.sort
     |> fun arr -> arr.[arr.Length / 2]
 
