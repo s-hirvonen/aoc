@@ -32,4 +32,24 @@ let executeMapping (input: int64) (maps: Mapping array) =
 
 let part1 (seeds, maps) = seeds |> Array.map (fun seed -> List.fold executeMapping seed maps) |> Array.min
 
-printfn "%d" (part1 input)
+let part2 (seeds, maps) =
+    let mutable lowest = System.Int64.MaxValue
+
+    seeds
+    |> Array.pairwise
+    |> Array.indexed
+    |> Array.filter (fst >> fun i -> i % 2 = 0)
+    |> Array.map (snd >> (fun (start, len) -> seq { start .. (start + len - 1L) }))
+    |> Array.iter (
+        Seq.iter (fun seed ->
+            let ans = List.fold executeMapping seed maps
+
+            if ans < lowest then
+                printfn "New lowest: %d" ans
+                lowest <- ans)
+    )
+
+    lowest
+
+// Part2 will take "a while" to run, the correct solution will appear soon enough though
+printfn "%d, %A" (part1 input) (part2 input)
