@@ -19,8 +19,7 @@ let toJokerHand =
     | l when List.length l <= 1 -> FiveOfAKind
     | 1 :: _ :: [] -> FourOfAKind
     | [ 2; 2 ] -> FullHouse
-    | [ 1; 1; 1 ]
-    | [ 1; 1; 2 ] -> ThreeOfAKind
+    | [ 1; 1; _ ] -> ThreeOfAKind
     | _ -> OnePair
 
 let valueOf partNum hand =
