@@ -1,4 +1,4 @@
-type Hand = | HighCard | OnePair | TwoPair | ThreeOfAKind | FullHouse | FourOfAKind | FiveOfAKind
+type Hand = HighCard | OnePair | TwoPair | ThreeOfAKind | FullHouse | FourOfAKind | FiveOfAKind
 
 let split (delim: string) (str: string) = str.Split(delim, System.StringSplitOptions.RemoveEmptyEntries)
 let toPattern = Seq.countBy id >> Seq.map snd >> Seq.sort >> List.ofSeq
@@ -22,16 +22,15 @@ let toJokerHand =
     | [ 1; 1; _ ] -> ThreeOfAKind
     | _ -> OnePair
 
-let valueOf partNum hand =
-    hand
-    |> Seq.map (function
+let valueOf partNum =
+    Seq.map (function
         | 'T' -> 10
         | 'J' -> 22 - (11 * partNum)
         | 'Q' -> 12
         | 'K' -> 13
         | 'A' -> 14
         | n -> int n - int '0')
-    |> Seq.fold (fun acc n -> (15 * acc) + n) 0
+    >> Seq.fold (fun acc n -> (15 * acc) + n) 0
 
 let solve partNum =
     let patternFn = [ toPattern >> toHand; Seq.filter (fun ch -> ch <> 'J') >> toPattern >> toJokerHand ].[partNum - 1]
