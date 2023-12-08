@@ -10,7 +10,6 @@ let toHand = function
 
 let toJokerHand = function
     | [] -> FiveOfAKind
-    | l when List.sum l = 5 -> toHand l
     | l -> toHand (l.Head + 5 - (List.sum l) :: l.Tail)
 
 let valueOf partNum =
@@ -24,9 +23,7 @@ let solve partNum =
     let patternFn = [ toPattern >> toHand; Seq.filter (fun ch -> ch <> 'J') >> toPattern >> toJokerHand ].[partNum - 1]
 
     System.IO.File.ReadAllLines "inputs/day07.txt"
-    |> Seq.map (
-        split " "
-        >> (fun row -> (patternFn row.[0], valueOf partNum row.[0]), int row.[1]))
+    |> Seq.map (split " " >> (fun row -> (patternFn row.[0], valueOf partNum row.[0]), int row.[1]))
     |> Seq.sortBy fst
     |> Seq.map snd
     |> Seq.indexed
