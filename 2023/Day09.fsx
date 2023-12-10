@@ -2,7 +2,7 @@ let rec extrapolate tails nums =
     let dx = Seq.windowed 2 >> Seq.map (Seq.rev >> Seq.reduce (-))
 
     match Seq.forall ((=) 0) nums with
-    | true -> tails |> Seq.reduce (+)
+    | true -> Seq.sum tails
     | false -> nums |> dx |> extrapolate ([ Seq.last nums ] @ tails)
 
 let solve part =
