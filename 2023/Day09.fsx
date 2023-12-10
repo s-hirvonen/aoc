@@ -3,7 +3,7 @@ let rec extrapolate tails nums =
 
     match Seq.forall ((=) 0) nums with
     | true -> tails |> Seq.reduce (+)
-    | false -> nums |> dx |> extrapolate (tails |> Seq.append [ Seq.last nums ])
+    | false -> nums |> dx |> extrapolate ([ Seq.last nums ] @ tails)
 
 let solve part =
     "inputs/day09.txt"
