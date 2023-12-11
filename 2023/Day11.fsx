@@ -1,7 +1,7 @@
 type Node = { X: int64; Y: int64; Value: char }
 
-let findExpanesions n (r: char array array) = r.[0 .. n - 1] |> Array.filter (Array.forall ((=) '.')) |> Array.length
-let expansionsBefore arrs y x = arrs |> snd |> findExpanesions x, arrs |> fst |> findExpanesions y
+let findExpansions n (r: char array array) = r.[0 .. n - 1] |> Array.filter (Array.forall ((=) '.')) |> Array.length
+let expansionsBefore arrs y x = arrs |> snd |> findExpansions x, arrs |> fst |> findExpansions y
 
 let rec pairs =
     function
