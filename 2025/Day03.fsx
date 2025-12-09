@@ -12,6 +12,6 @@ let rec greatestNDigitStr n xs =
 let solve n =
     "2025/inputs/day03.txt"
     |> System.IO.File.ReadAllLines
-    |> Array.sumBy (Seq.map string >> greatestNDigitStr n >> int64)
+    |> Seq.sumBy (Seq.map string >> greatestNDigitStr n >> int64)
 
 [ 2; 12 ] |> List.map (solve >> printfn "%d")
