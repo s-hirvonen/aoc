@@ -25,3 +25,5 @@ let part2 =
             |> Array.map _.Split('.', System.StringSplitOptions.RemoveEmptyEntries))
     ||> Seq.zip
     |> Seq.sumBy calculate
+
+printfn "Part 1: %d, Part 2: %d" part1 part2
